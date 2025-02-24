@@ -2,6 +2,7 @@ import { getDayOfYear } from "../../../getDayOfYear/index.js";
 import { getISOWeek } from "../../../getISOWeek/index.js";
 import { getISOWeekYear } from "../../../getISOWeekYear/index.js";
 import { getWeek } from "../../../getWeek/index.js";
+import { getWeekOfMonth } from "../../../getWeekOfMonth/index.js";
 import { getWeekYear } from "../../../getWeekYear/index.js";
 import type { LocaleDayPeriod, Localize } from "../../../locale/types.js";
 import type {
@@ -83,7 +84,6 @@ type Formatter = (
  */
 
 export const formatters: { [token: string]: Formatter } = {
-  // TODO: Add W format
   // Era
   G: function (date, token, localize) {
     const era: Era = date.getFullYear() > 0 ? 1 : 0;
@@ -299,6 +299,17 @@ export const formatters: { [token: string]: Formatter } = {
     }
 
     return addLeadingZeros(week, token.length);
+  },
+
+  // Local week of month
+  W: function (date, token, localize, options) {
+    const weekOfMonth = getWeekOfMonth(date, options);
+
+    if (token === "Wo") {
+      return localize.ordinalNumber(weekOfMonth, { unit: "week" });
+    }
+
+    return addLeadingZeros(weekOfMonth, token.length);
   },
 
   // ISO week of year
