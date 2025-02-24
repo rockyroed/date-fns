@@ -329,6 +329,23 @@ describe("format", () => {
       });
     });
 
+    describe("local week of month", () => {
+      it("works as expected", () => {
+        const date = new Date(1986, 3 /* Apr */, 6);
+        const result = format(date, "W Wo WW");
+        expect(result).toBe("2 2nd 02");
+      });
+
+      it("allows to specify `weekStartsOn` and `firstWeekContainsDate` in options", () => {
+        const date = new Date(1986, 3 /* Apr */, 6);
+        const result = format(date, "W Wo WW", {
+          weekStartsOn: 1,
+          firstWeekContainsDate: 4,
+        });
+        expect(result).toBe("1 1st 01");
+      });
+    });
+
     it("ISO week of year", () => {
       const date = new Date(1986, 3 /* Apr */, 6);
       const result = format(date, "I Io II");
