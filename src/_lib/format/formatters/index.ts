@@ -83,6 +83,7 @@ type Formatter = (
  */
 
 export const formatters: { [token: string]: Formatter } = {
+  // TODO: Add W format
   // Era
   G: function (date, token, localize) {
     const era: Era = date.getFullYear() > 0 ? 1 : 0;
