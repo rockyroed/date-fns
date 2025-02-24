@@ -5,8 +5,11 @@ import { readFile, readdir, rmdir, stat, unlink, writeFile } from "fs/promises";
 import { dirname, join, relative, resolve } from "path";
 
 const dirsToRemove = new Set<string>();
-const root = resolve(process.env.PACKAGE_OUTPUT_PATH || "lib");
-const relativeRoot = relative(process.cwd(), root);
+const root = resolve(process.env.PACKAGE_OUTPUT_PATH || "lib").replace(
+  /\\/g,
+  "/",
+);
+const relativeRoot = relative(process.cwd(), root).replace(/\\/g, "/");
 
 async function main() {
   return getFiles(relativeRoot)
@@ -14,12 +17,15 @@ async function main() {
       Promise.all(
         files.map(async (filePath) => {
           const content = await readFile(filePath, "utf-8");
-          const newFilePath = getNewPath(filePath);
+          const newFilePath = getNewPath(filePath).replace(/\\/g, "/");
           const isCJS = /\.cjs$/.test(filePath);
           const replaceRE = isCJS ? /require\("([^"]+)"\)/g : /from "([^"]+)"/g;
 
           let newContent = content.replace(replaceRE, (_str, relImportPath) => {
-            const newRelImportPath = getNewImportPath(filePath, relImportPath);
+            const newRelImportPath = getNewImportPath(
+              filePath,
+              relImportPath,
+            ).replace(/\\/g, "/");
             return isCJS
               ? `require("${newRelImportPath}")`
               : `from "${newRelImportPath}"`;
@@ -29,11 +35,11 @@ async function main() {
             newContent = newContent.replace(
               /import\("([^"]+)"\)/g,
               (_str, relImportPath) =>
-                `import("${getNewImportPath(filePath, relImportPath)}")`,
+                `import("${getNewImportPath(filePath, relImportPath).replace(/\\/g, "/")}")`,
             );
 
           // Non-empty dirs won't delete, so we can add all dirs
-          dirsToRemove.add(dirname(filePath));
+          dirsToRemove.add(dirname(filePath).replace(/\\/g, "/"));
 
           if (newFilePath !== filePath)
             return Promise.all([
@@ -54,13 +60,16 @@ async function main() {
 }
 
 function getNewImportPath(filePath: string, relImportPath: string): string {
-  const importPath = resolvePath(filePath, relImportPath);
+  const importPath = resolvePath(filePath, relImportPath).replace(/\\/g, "/");
 
-  const newFilePath = getNewPath(filePath);
-  const newFullImportPath = getNewPath(importPath);
+  const newFilePath = getNewPath(filePath).replace(/\\/g, "/");
+  const newFullImportPath = getNewPath(importPath).replace(/\\/g, "/");
 
   // Determine the relative path between newFilePath and newFullImportPath
-  const newImportPath = relative(dirname(newFilePath), newFullImportPath);
+  const newImportPath = relative(
+    dirname(newFilePath),
+    newFullImportPath,
+  ).replace(/\\/g, "/");
 
   return newImportPath.startsWith(".") ? newImportPath : "./" + newImportPath;
 }
@@ -75,8 +84,8 @@ function getNewPath(oldPath: string) {
 }
 
 function resolvePath(base: string, relativePath: string) {
-  const baseDir = dirname(base);
-  return join(baseDir, relativePath);
+  const baseDir = dirname(base).replace(/\\/g, "/");
+  return join(baseDir, relativePath).replace(/\\/g, "/");
 }
 
 const ignoreProcess = [new RegExp(`^${relativeRoot}/docs`)];
@@ -86,7 +95,7 @@ async function getFiles(dir: string): Promise<string[]> {
   let allFiles: string[] = [];
 
   for (const file of files) {
-    const fullPath = join(dir, file);
+    const fullPath = join(dir, file).replace(/\\/g, "/");
     const stats = await stat(fullPath);
 
     if (stats.isDirectory()) {
