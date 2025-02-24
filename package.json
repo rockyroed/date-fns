@@ -7419,6 +7419,26 @@
         "types": "./locale/zh-TW.d.ts",
         "default": "./locale/zh-TW.js"
       }
+    },
+    "./*.js": {
+      "require": {
+        "types": "./*.d.cts",
+        "default": "./*.cjs"
+      },
+      "import": {
+        "types": "./*.d.ts",
+        "default": "./*.js"
+      }
+    },
+    "./*": {
+      "require": {
+        "types": "./*.d.cts",
+        "default": "./*.cjs"
+      },
+      "import": {
+        "types": "./*.d.ts",
+        "default": "./*.js"
+      }
     }
   },
   "scripts": {
