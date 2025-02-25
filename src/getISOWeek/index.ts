@@ -29,6 +29,7 @@ export interface GetISOWeekOptions extends ContextOptions<Date> {}
  * const result = getISOWeek(new Date(2005, 0, 2))
  * //=> 53
  */
+// TODO: Fix incorrect week number
 export function getISOWeek(
   date: DateArg<Date> & {},
   options?: GetISOWeekOptions | undefined,
